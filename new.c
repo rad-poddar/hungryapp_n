@@ -29,6 +29,8 @@ typedef struct item
     struct item *next;
 }item;
 
+
+
 typedef struct agent
 {
     char name[20];
@@ -51,6 +53,7 @@ typedef struct user_tag
 {
     int id;
     char name[20];
+    char address[20];
     char phone[10];
     int add_code;
     struct user_tag *next;
@@ -59,6 +62,7 @@ typedef struct user_tag
 typedef struct outlet
 {
     char name[20];
+    char address[20];
     int add_code;
     int seats;
     item *menu;
@@ -66,6 +70,14 @@ typedef struct outlet
     struct outlet *next;
     
 }outlet;
+
+
+typedef struct order{
+    outlet *selected_outlet;
+    agent *selected_agent;
+    item *food;
+    int quantity;
+}order;
 
 typedef struct category
 {
@@ -81,6 +93,7 @@ void addoutlet(category cat[]);
 void address_name(char c[],int address_code);
 void traverse_outlet(outlet *o,int address);
 void search_category(category cat[],user *u);
+void Sort_addresscodes(int arr[],int a);
 /*------------------------------------------------------*/
 
 
@@ -154,20 +167,29 @@ void address_name(char c[],int address_code)
 
 void traverse_outlet(outlet *o,int address)
 {
-    int near[3]={1000,1000,1000};
     int d,i,j,flag;
-    char ad[20];
+    outlet *ptr;
+    ptr=o;
     if (address!=-1)
     {
-        while (o!=NULL)
+        
+        while (ptr!=NULL)
         {
-            address_name(ad,o->add_code);
-            printf("-----------------\nfood outlet name-%s\nNumber of seats-%daddress-%s\n------------\n",o->name,o->seats,ad);
+            printf("-----------------\nfood outlet name-%s\nNumber of seats-%daddress-%s\n------------\n",ptr->name,ptr->seats,ptr->address);
+            ptr=ptr->next;
         }
     }else
     {
-        
-            
+        int a[5]={0,1,2,3,4};
+        Sort_addresscodes(a, address);
+        while (ptr!=NULL)
+        {
+            if (ptr->add_code==a[0]||ptr->add_code==a[1]||ptr->add_code==a[2])
+            {
+                printf("-----------------\nfood outlet name-%s\nNumber of seats-%daddress-%s\n------------\n",ptr->name,ptr->seats,ptr->address);
+            }
+            ptr=ptr->next;
+        }
     }
     
 }
@@ -227,7 +249,44 @@ void search_category(category cat[],user *u)
     
     
 }
+/*-------------------------------------------*/
+void Sort_addresscodes(int arr[],int a)
+{
+    int i, key, j;
+    for (i = 1; i < 5; i++)
+    {
+        key = arr[i];
+        j = i-1;
+        while (j >= 0 && distance(arr[j],a) >distance(key, a))
+        {
+            arr[j+1] = arr[j];
+            j = j-1;
+        }
+        arr[j+1] = key;
+    }
+}
 
+/*_________________________________________________*/
 
+void assign_agent(category cat[],item *food,outlet *selected_outlet)
+{
+    int a[5]={0,1,2,3,4};
+    int i,found=0;
+    agent *selected_agent;
+    Sort_addresscodes(a,selected_outlet->add_code);
+    for (i=0; i<5&&found==0; i++)
+    {
+        if (free_agents[i]!=NULL)
+        {
+            selected_agent=free_agents[i];
+            found=1;
+            free_agents[i]=selected_agent->next;
+            selected_agent->next=alloc;
+            alloc=selected_agent;
+            
+        }
+    }
+    
+}
 
 
